@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <string.h>
+
+// Structure to represent an employee
+struct Employee {
+    int empID;
+    char empName[50];
+    float empSalary;
+};
+
+// Function to add an employee record to the file
+void addEmployee(FILE* file, struct Employee employee) {
+    fseek(file, 0, SEEK_END); // Move the file pointer to the end
+
+    // Write the employee structure to the file
+    fwrite(&employee, sizeof(struct Employee), 1, file);
+}
+
+// Function to display all employee records from the file
+void displayEmployees(FILE* file) {
+    struct Employee employee;
+
+    // Move the file pointer to the beginning
+    fseek(file, 0, SEEK_SET);
+
+    while (fread(&employee, sizeof(struct Employee), 1, file)) {
+        printf("Employee ID: %d\n", employee.empID);
+        printf("Employee Name: %s\n", employee.empName);
+        printf("Employee Salary: %.2f\n", employee.empSalary);
+        printf("\n");
+    }
+}
+
+int main() {
+    FILE* employeeFile;
+
+    // Open the random access file for reading and writing
+    employeeFile = fopen("employee.dat", "r+");
+
+    if (employeeFile == NULL) {
+        // If the file does not exist, create a new file
+        employeeFile = fopen("employee.dat", "w+");
+    }
+
+    if (employeeFile == NULL) {
+        printf("Error opening the file.\n");
+        return 1;
+    }
+
+    int choice;
+    struct Employee emp;
+
+    do {
+        printf("1. Add Employee\n");
+        printf("2. Display Employees\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter Employee ID: ");
+                scanf("%d", &emp.empID);
+                printf("Enter Employee Name: ");
+                scanf(" %[^\n]s", emp.empName); // Read the name with spaces
+                printf("Enter Employee Salary: ");
+                scanf("%f", &emp.empSalary);
+                addEmployee(employeeFile, emp);
+                break;
+            case 2:
+                printf("\nEmployee Details:\n");
+                displayEmployees(employeeFile);
+                break;
+            case 3:
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 3);
+
+    fclose(employeeFile);
+
+    return 0;
+}
