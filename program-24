@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fileDescriptor;
+    ssize_t bytesRead, bytesWritten;
+    char buffer[100];
+
+    // Open a file for writing
+    fileDescriptor = open("example.txt", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    if (fileDescriptor == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    // Write content to the file
+    const char* message = "Hello, UNIX System Calls!";
+    bytesWritten = write(fileDescriptor, message, strlen(message));
+    if (bytesWritten == -1) {
+        perror("write");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+    printf("Write Successful! %zd bytes written.\n", bytesWritten);
+
+    // Close the file
+    close(fileDescriptor);
+
+    // Open the file for reading
+    fileDescriptor = open("example.txt", O_RDONLY);
+    if (fileDescriptor == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+
+    // Read content from the file
+    bytesRead = read(fileDescriptor, buffer, sizeof(buffer));
+    if (bytesRead == -1) {
+        perror("read");
+        close(fileDescriptor);
+        exit(EXIT_FAILURE);
+    }
+    buffer[bytesRead] = '\0'; // Null-terminate the string
+    printf("Read Successful! %zd bytes read:\n%s\n", bytesRead, buffer);
+
+    // Close the file
+    close(fileDescriptor);
+
+    return 0;
+}
